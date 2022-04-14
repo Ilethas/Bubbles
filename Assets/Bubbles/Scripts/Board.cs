@@ -4,10 +4,15 @@ using System.Linq;
 using QPathFinder;
 using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 using Random = UnityEngine.Random;
 
 namespace Bubbles.Scripts
 {
+    public delegate void TurnChanged(int newTurnNumber);
+    public delegate void ScoreChanged(int newScore);
+    public delegate void GameFinished();
+    
     // Cached cell state
     public struct BoardCell
     {
@@ -41,24 +46,104 @@ namespace Bubbles.Scripts
     
         private BoardCell[,] _cellsPool;
         private int _activeBubblesAmount = 0;
+        private int scoreToNextColor;
         private List<PendingBubble> _pendingBubbles = new List<PendingBubble>();
         private List<Vector2Int> _scoredBubbles = new List<Vector2Int>();
+        private List<Color> _bubbleColors = new List<Color>();
+        private List<Color> _additionalColors = new List<Color>();
         private Vector2Int? _lastMoveDestination = null;
-
+        private bool _isGameFinished = false;
         private Bubble _selectedBubble = null;
         
-        public List<Color> bubbleColors = new List<Color>();
+        public List<Color> defaultBubbleColors = new List<Color>();
+        public List<Color> defaultAdditionalColors = new List<Color>();
         [MinAttribute(1)] public int bubblesSpawnedPerTurn = 3;
         [MinAttribute(2)] public int amountOfBubblesPerLine = 5;
-        public int playerScore = 0;
+        [MinAttribute(2)] public int maxBubbleColors = 9;
+        [MinAttribute(1)] public int pointsAmountPerAdditionalColor = 50;
+        
+        private int _playerScore = 0;
+        public int PlayerScore
+        {
+            get => _playerScore;
+            set
+            {
+                // Add a new possible bubble color, if the player reached the score threshold
+                scoreToNextColor -= value - _playerScore;
+                if (scoreToNextColor <= 0)
+                {
+                    scoreToNextColor = amountOfBubblesPerLine;
+                    if (_bubbleColors.Count < maxBubbleColors)
+                    {
+                        // Get first predefined color and add it to the color list
+                        if (_additionalColors.Count > 0)
+                        {
+                            _bubbleColors.Add(_additionalColors.First());
+                            _additionalColors.RemoveAt(0);
+                        }
+                        else
+                        {
+                            // Generate a random color otherwise
+                            while (true)
+                            {
+                                Color newColor = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+                                if (!_bubbleColors.Contains(newColor))
+                                {
+                                    _bubbleColors.Add(newColor);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Update the actual score value and notify subscribers
+                _playerScore = value;
+                scoreChanged?.Invoke(value);
+            }
+        }
+        
+        private int _currentTurn = 1;
+        public int CurrentTurn
+        {
+            get => _currentTurn;
+            set
+            {
+                _currentTurn = value;
+                turnChanged?.Invoke(value);
+            }
+        }
+
+        public TurnChanged turnChanged;
+        public ScoreChanged scoreChanged;
+        public GameFinished gameFinished;
 
         void Start()
         {
             // Initialize the board
             _cellsPool = new BoardCell[height, width];
             SpawnBoardPrefabs();
+            Restart();
+        }
+
+        public void Restart()
+        {
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    SetBubbleActive(new Vector2Int(j, i), Color.clear, false);
+                }
+            }
+
+            _selectedBubble = null;
+            _isGameFinished = false;
+            _bubbleColors = new List<Color>(defaultBubbleColors);
+            _additionalColors = new List<Color>(defaultAdditionalColors);
+            scoreToNextColor = pointsAmountPerAdditionalColor;
+            PlayerScore = 0;
+            CurrentTurn = 1;
             
-            // Create some initial bubbles, so that the board is somewhat populated at the game start
             MarkNewBubblesPositions();
             SpawnAdditionalBubbles();
             MarkNewBubblesPositions();
@@ -181,6 +266,11 @@ namespace Bubbles.Scripts
 
         public void OnTileClicked(Vector2Int tilePosition)
         {
+            if (_isGameFinished)
+            {
+                return;
+            }
+            
             if (_selectedBubble != null)
             {
                 if (TryMoveSelectedBubbleToCell(tilePosition))
@@ -293,7 +383,7 @@ namespace Bubbles.Scripts
             {
                 SetBubbleActive(position, Color.clear, false);
             }
-            playerScore += _scoredBubbles.Count;
+            PlayerScore += _scoredBubbles.Count;
             _scoredBubbles.Clear();
         }
 
@@ -302,6 +392,18 @@ namespace Bubbles.Scripts
             SpawnAdditionalBubbles();
             ScoreBubbles();
             MarkNewBubblesPositions();
+            HandleGameFinishedConditions();
+
+            CurrentTurn++;
+        }
+
+        void HandleGameFinishedConditions()
+        {
+            if (_activeBubblesAmount == width * height - 1)
+            {
+                _isGameFinished = true;
+                gameFinished?.Invoke();
+            }
         }
 
         public void OnBubbleClicked(Vector2Int bubblePosition)
@@ -331,7 +433,7 @@ namespace Bubbles.Scripts
                 }
                 
                 // Add the tile to the list of tiles that are about to create a bubble
-                Color color = bubbleColors[Random.Range(0, bubbleColors.Count)];
+                Color color = _bubbleColors[Random.Range(0, _bubbleColors.Count)];
                 
                 _pendingBubbles.Add(new PendingBubble(position, color));
                 _cellsPool[position.y, position.x].tile.TileColor = color;

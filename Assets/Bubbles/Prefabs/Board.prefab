@@ -108,9 +108,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 532bceba11c88ef49ad28965aee8f47a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 8
-  height: 6
-  tilePrefab: {fileID: 1867115347295159670, guid: ef8fa5e7d9dcfd34babfdf75aedd9b3c,
+  width: 9
+  height: 9
+  tilePrefab: {fileID: 3909396183962371951, guid: 5baf3152a4dbffd458247a6caf1a4a29,
     type: 3}
   bubblePrefab: {fileID: 3490045687112805878, guid: 2eff2508278fb394197e2e3a08d165c9,
     type: 3}
+  defaultBubbleColors:
+  - {r: 1, g: 0, b: 0, a: 0}
+  - {r: 0, g: 0, b: 1, a: 0}
+  - {r: 0, g: 1, b: 0, a: 0}
+  - {r: 1, g: 1, b: 0, a: 0}
+  - {r: 1, g: 0, b: 1, a: 0}
+  - {r: 0, g: 1, b: 1, a: 0}
+  defaultAdditionalColors:
+  - {r: 1, g: 0.36715755, b: 0, a: 0}
+  - {r: 0.60721064, g: 0, b: 1, a: 0}
+  bubblesSpawnedPerTurn: 3
+  amountOfBubblesPerLine: 5
+  maxBubbleColors: 9
+  pointsAmountPerAdditionalColor: 50
