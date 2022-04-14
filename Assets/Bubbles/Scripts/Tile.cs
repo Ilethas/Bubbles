@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Bubbles.Scripts
 {
-    public class Tile : BoardElement
+    public class Tile : Element
     {
         private Material _bodyMaterial;
         private Material _indicatorMaterial;

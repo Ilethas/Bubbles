@@ -200,14 +200,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
-  m_LocalRotation: {x: -0.3826436, y: -0.05178082, z: 0.021480013, w: -0.9221937}
-  m_LocalPosition: {x: 1.9186866, y: 5.68999, z: -8.124942}
+  m_LocalRotation: {x: 0.49999884, y: -0.0018893982, z: 0.0010908446, w: 0.86602336}
+  m_LocalPosition: {x: 3.9979708, y: 6.8820515, z: -9.426436}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 60, y: -0.25, z: 0}
 --- !u!114 &330585547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -464,14 +464,29 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
         type: 3}
+      propertyPath: width
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
+        type: 3}
+      propertyPath: height
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
+        type: 3}
       propertyPath: tilePrefab
       value: 
       objectReference: {fileID: 3909396183962371951, guid: 5baf3152a4dbffd458247a6caf1a4a29,
         type: 3}
     - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
         type: 3}
+      propertyPath: amountOfBubblesPerLine
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
+        type: 3}
       propertyPath: bubbleColors.Array.size
-      value: 4
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
         type: 3}
@@ -496,7 +511,7 @@ PrefabInstance:
     - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
         type: 3}
       propertyPath: bubbleColors.Array.data[1].g
-      value: 0.020182133
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
         type: 3}
@@ -516,12 +531,12 @@ PrefabInstance:
     - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
         type: 3}
       propertyPath: bubbleColors.Array.data[2].r
-      value: 0.1573993
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
         type: 3}
       propertyPath: bubbleColors.Array.data[3].b
-      value: 0.8741455
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
         type: 3}
@@ -532,6 +547,36 @@ PrefabInstance:
         type: 3}
       propertyPath: bubbleColors.Array.data[3].r
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
+        type: 3}
+      propertyPath: bubbleColors.Array.data[4].b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
+        type: 3}
+      propertyPath: bubbleColors.Array.data[4].g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
+        type: 3}
+      propertyPath: bubbleColors.Array.data[4].r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
+        type: 3}
+      propertyPath: bubbleColors.Array.data[5].b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
+        type: 3}
+      propertyPath: bubbleColors.Array.data[5].g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2416847754509282014, guid: c4f8e18bede86984d93ab06424072951,
+        type: 3}
+      propertyPath: bubbleColors.Array.data[5].r
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2416847754509282015, guid: c4f8e18bede86984d93ab06424072951,
         type: 3}

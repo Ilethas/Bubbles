@@ -2,7 +2,7 @@
 
 namespace Bubbles.Scripts
 {
-    public class BoardElement : MonoBehaviour, IInteractableBoardElement
+    public class Element : MonoBehaviour, IInteractableElement
     {
         public Board parentBoard;
         public Vector2Int boardPosition;

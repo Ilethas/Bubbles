@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Bubbles.Scripts
 {
-    public class Bubble : BoardElement
+    public class Bubble : Element
     {
         private Material _topMaterial;
 

@@ -21,7 +21,7 @@ namespace Bubbles.Scripts
                 RaycastHit hit;
                 if (Physics.Raycast(ray, out hit, 10000f))
                 {
-                    IInteractableBoardElement element = hit.transform.gameObject.GetComponent<IInteractableBoardElement>();
+                    IInteractableElement element = hit.transform.gameObject.GetComponent<IInteractableElement>();
                     element?.OnClick();
                 }
             }

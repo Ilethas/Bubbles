@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 
 namespace Bubbles.Scripts
 {
-
+    // Cached cell state
     public struct BoardCell
     {
         public GameObject tileObject;
@@ -18,6 +18,7 @@ namespace Bubbles.Scripts
         public Tile tile;
     }
 
+    // Stores information about bubbles of a particular color that are about to spawn in some location
     struct PendingBubble
     {
         public Vector2Int position;
@@ -41,22 +42,26 @@ namespace Bubbles.Scripts
         private BoardCell[,] _cellsPool;
         private int _activeBubblesAmount = 0;
         private List<PendingBubble> _pendingBubbles = new List<PendingBubble>();
+        private List<Vector2Int> _scoredBubbles = new List<Vector2Int>();
+        private Vector2Int? _lastMoveDestination = null;
 
         private Bubble _selectedBubble = null;
         
         public List<Color> bubbleColors = new List<Color>();
         [MinAttribute(1)] public int bubblesSpawnedPerTurn = 3;
+        [MinAttribute(2)] public int amountOfBubblesPerLine = 5;
         public int playerScore = 0;
 
         void Start()
         {
+            // Initialize the board
             _cellsPool = new BoardCell[height, width];
-            
             SpawnBoardPrefabs();
+            
+            // Create some initial bubbles, so that the board is somewhat populated at the game start
             MarkNewBubblesPositions();
             SpawnAdditionalBubbles();
             MarkNewBubblesPositions();
-            SpawnAdditionalBubbles();
         }
 
         private void SpawnBoardPrefabs()
@@ -103,18 +108,13 @@ namespace Bubbles.Scripts
 
         void InitializeBoardElement(GameObject boardElementObject, string elementName, Vector2Int position)
         {
-            BoardElement boardElement = boardElementObject.GetComponent<BoardElement>();
-            if (boardElement != null)
+            Element element = boardElementObject.GetComponent<Element>();
+            if (element != null)
             {
                 boardElementObject.name = $"{elementName} ({position.x}, {position.y})";
-                boardElement.boardPosition = position;
-                boardElement.parentBoard = this;
+                element.boardPosition = position;
+                element.parentBoard = this;
             }
-        }
-
-        void Update()
-        {
-        
         }
 
         private int GetNodeIndex(int rowNumber, int columnNumber)
@@ -181,8 +181,15 @@ namespace Bubbles.Scripts
 
         public void OnTileClicked(Vector2Int tilePosition)
         {
-            TryMoveSelectedBubbleToCell(tilePosition);
-            // Debug.Log($"Tile ({tilePosition.x}, {tilePosition.y}) was clicked!");
+            if (_selectedBubble != null)
+            {
+                if (TryMoveSelectedBubbleToCell(tilePosition))
+                {
+                    _lastMoveDestination = tilePosition;
+                    CheckIfBubblesMakeLines(tilePosition);
+                    OnNextTurn();
+                };
+            }
         }
 
         bool TryMoveSelectedBubbleToCell(Vector2Int destination)
@@ -224,17 +231,82 @@ namespace Bubbles.Scripts
             return true;
         }
 
-        public void OnBubbleClicked(Vector2Int bubblePosition)
+        bool IsPositionValid(Vector2Int position)
         {
-            _selectedBubble = _cellsPool[bubblePosition.y, bubblePosition.x].bubble;
-            CreatePathfindingGraph();
+            // Check if position corresponds to a cell in the board
+            return position.x >= 0 && position.y >= 0 && position.x < width && position.y < height;
+        }
+
+        public void CheckIfBubblesMakeLines(Vector2Int destination)
+        {
+            // Inspect the destination position and see if there are any lines of bubbles emanating out of it
+            Vector2Int pos = destination;
+            Color movedBubbleColor = Color.clear;
+            List<Vector2Int> bubblesToRemove = new List<Vector2Int>();
             
-            Debug.Log($"Bubble ({bubblePosition.x}, {bubblePosition.y}) was clicked!");
+            Vector2Int[] stepDirections = { Vector2Int.right, Vector2Int.up, Vector2Int.one, new Vector2Int(1, -1) };
+            foreach (Vector2Int direction in stepDirections)
+            {
+                Vector2Int step = direction;
+                pos = destination;
+                if (IsPositionValid(pos))
+                {
+                    movedBubbleColor = _cellsPool[pos.y, pos.x].bubble.BubbleColor;
+                    pos += step;
+                }
+
+                bool flippedStepDirection = false;
+                while (true)
+                {
+                    if (IsPositionValid(pos) && _cellsPool[pos.y, pos.x].bubble.BubbleColor == movedBubbleColor)
+                    {
+                        bubblesToRemove.Add(pos);
+                    }
+                    else
+                    {
+                        if (!flippedStepDirection)
+                        {
+                            step *= -1;
+                            pos = destination - step;
+                            flippedStepDirection = true;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    pos += step;
+                }
+
+                if (bubblesToRemove.Count >= amountOfBubblesPerLine)
+                {
+                    _scoredBubbles.AddRange(bubblesToRemove);
+                }
+                bubblesToRemove.Clear();
+            }
+        }
+
+        private void ScoreBubbles()
+        {
+            // Despawn all bubbles that were in lines of appropriate lengths and increase the player's score
+            foreach (Vector2Int position in _scoredBubbles)
+            {
+                SetBubbleActive(position, Color.clear, false);
+            }
+            playerScore += _scoredBubbles.Count;
+            _scoredBubbles.Clear();
         }
 
         private void OnNextTurn()
         {
-            
+            SpawnAdditionalBubbles();
+            ScoreBubbles();
+            MarkNewBubblesPositions();
+        }
+
+        public void OnBubbleClicked(Vector2Int bubblePosition)
+        {
+            _selectedBubble = _cellsPool[bubblePosition.y, bubblePosition.x].bubble;
         }
 
         private void MarkNewBubblesPositions()
@@ -272,7 +344,11 @@ namespace Bubbles.Scripts
             // Activate the randomized bubbles
             foreach (PendingBubble pendingBubble in _pendingBubbles)
             {
-                SetBubbleActive(pendingBubble.position, pendingBubble.color, true);
+                if (pendingBubble.position != _lastMoveDestination)
+                {
+                    SetBubbleActive(pendingBubble.position, pendingBubble.color, true);
+                    CheckIfBubblesMakeLines(pendingBubble.position);
+                }
             }
             _pendingBubbles.Clear();
         }

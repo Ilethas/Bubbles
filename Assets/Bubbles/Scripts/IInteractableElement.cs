@@ -1,6 +1,6 @@
 ﻿namespace Bubbles.Scripts
 {
-    public interface IInteractableBoardElement
+    public interface IInteractableElement
     {
         public void OnClick();
     }
